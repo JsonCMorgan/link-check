@@ -12,7 +12,9 @@
         <p><a href="/">← Back to {{ site_name }}</a></p>
 
         <h2>What we do with your input</h2>
-        <p>In version 0.1, your URL, message text, or QR image is processed <strong>on the server in memory</strong> to extract links and compare domains to the name you optionally enter. We <strong>do not</strong> HTTP-fetch those links. We <strong>do not</strong> send content to VirusTotal, Google Safe Browsing, or similar unless a future version adds an explicit opt-in (none today).</p>
+        <p>By default, your URL, message text, or QR image is processed <strong>on the server in memory</strong>. We <strong>do not</strong> open the suspicious link.</p>
+        <p>If you tick <strong>Check official careers page</strong>, we HTTP-fetch only URLs listed in our employer config (for example <code>careers.intactfc.com</code> for Intact). We never fetch the link you pasted. We scan that HTML for hiring-vendor names. Your hosting provider may log those outbound requests.</p>
+        <p>We <strong>do not</strong> send your paste to VirusTotal, Google Safe Browsing, or similar.</p>
         <p>QR photos are decoded in memory and discarded. They are not written to disk as part of the check.</p>
 
         <h2>Logs</h2>

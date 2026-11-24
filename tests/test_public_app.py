@@ -30,7 +30,7 @@ def test_api_check_intact_paradox(web_client):
     )
     assert r.status_code == 200
     data = r.get_json()
-    assert data["verdict"] == "do_not_click"
+    assert data["verdict"] == "verify_official_site"
 
 
 def test_index_html(web_client):
@@ -49,4 +49,4 @@ def test_api_message_mode(web_client):
     assert r.status_code == 200
     data = r.get_json()
     assert data["mode"] == "message"
-    assert data["worst"]["verdict"] == "do_not_click"
+    assert data["worst"]["verdict"] == "verify_official_site"

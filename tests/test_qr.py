@@ -13,7 +13,7 @@ def test_qr_payloads_analyze_as_message():
         claimed_brand="Intact Financial",
     )
     assert r["ok"]
-    assert r["results"][0]["verdict"] == "do_not_click"
+    assert r["results"][0]["verdict"] == "verify_official_site"
 
 
 def test_qr_paste_without_image():

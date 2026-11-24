@@ -35,6 +35,13 @@ def _client_ip() -> str:
     return forwarded or (request.remote_addr or "unknown")
 
 
+def _verify_careers_on(data: dict[str, Any]) -> bool:
+    v = data.get("verify_careers")
+    if isinstance(v, bool):
+        return v
+    return str(v or "").lower() in ("1", "true", "yes", "on")
+
+
 def _rate_ok(ip: str) -> bool:
     now = time.time()
     window = _hits[ip]
@@ -55,6 +62,7 @@ def _check_payload(
         return {"ok": False, "error": "Too many checks; wait a minute and try again."}, 429
 
     claimed = (data.get("claimed_brand") or data.get("claimed") or "").strip()
+    verify_careers = _verify_careers_on(data)
 
     if qr_bytes or (data.get("qr_paste") or "").strip():
         return (
@@ -62,18 +70,19 @@ def _check_payload(
                 qr_bytes or b"",
                 claimed_brand=claimed,
                 pasted_url=(data.get("qr_paste") or "").strip(),
+                verify_careers=verify_careers,
             ),
             200,
         )
 
     message = (data.get("message") or data.get("text") or "").strip()
     if message:
-        return analyze_message(message, claimed_brand=claimed), 200
+        return analyze_message(message, claimed_brand=claimed, verify_careers=verify_careers), 200
 
     url = (data.get("url") or "").strip()
     if not url:
         return {"ok": False, "error": "Paste a URL, message, or QR image."}, 400
-    return analyze_link(url, claimed_brand=claimed), 200
+    return analyze_link(url, claimed_brand=claimed, verify_careers=verify_careers), 200
 
 
 @app.route("/")
@@ -113,6 +122,7 @@ def form_check():
         "url": request.form.get("url") or "",
         "message": request.form.get("message") or "" if mode == "message" else "",
         "qr_paste": request.form.get("qr_paste") or "" if mode == "qr" else "",
+        "verify_careers": request.form.get("verify_careers"),
     }
     result, status = _check_payload(data, qr_bytes=qr_bytes if mode == "qr" else None)
     if request.accept_mimetypes.best == "application/json":
@@ -126,6 +136,7 @@ def form_check():
         form_message=data.get("message") or "",
         form_qr_paste=data.get("qr_paste") or "",
         form_claimed=data["claimed_brand"],
+        form_verify_careers=_verify_careers_on(data),
     ), status if status != 200 else 200
 
 

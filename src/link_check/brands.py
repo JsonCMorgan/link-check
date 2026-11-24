@@ -108,6 +108,30 @@ def is_recruiting_vendor_host(host: str) -> bool:
     return any(h == sfx or h.endswith("." + sfx) for sfx in RECRUITING_VENDOR_SUFFIXES)
 
 
+def host_allowed_vendor_for_brand(host: str, brand: dict[str, Any]) -> bool:
+    """True if host is a curated third-party vendor this employer may use for hiring."""
+    if not host or not brand:
+        return False
+    h = (host or "").lower()
+    for suffix in brand.get("allowed_vendor_hosts") or ():
+        sfx = str(suffix).lower().strip()
+        if not sfx:
+            continue
+        if h == sfx or h.endswith("." + sfx):
+            return True
+    return False
+
+
+def careers_page_urls(brand: dict[str, Any]) -> list[str]:
+    """HTTPS careers URLs we may fetch when the user opts in (must stay on brand domains)."""
+    urls: list[str] = []
+    for u in brand.get("careers_urls") or ():
+        u = str(u).strip()
+        if u:
+            urls.append(u)
+    return urls
+
+
 def list_pack_names() -> list[str]:
     """Pack ids currently enabled."""
     return _default_pack_ids()

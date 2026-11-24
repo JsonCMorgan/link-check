@@ -1,7 +1,9 @@
 {
   "intact": {
     "display": "Intact Financial",
-    "domains": ["intact.ca", "intact.com", "intact.net", "intactfinancial.com", "intactfc.com"]
+    "domains": ["intact.ca", "intact.com", "intact.net", "intactfinancial.com", "intactfc.com"],
+    "allowed_vendor_hosts": ["paradox.ai"],
+    "careers_urls": ["https://careers.intactfc.com/"]
   },
   "microsoft": {
     "display": "Microsoft",

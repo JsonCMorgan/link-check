@@ -6,10 +6,12 @@ import re
 from typing import Any
 
 from link_check.brands import (
+    host_allowed_vendor_for_brand,
     host_matches_brand,
     is_recruiting_vendor_host,
     resolve_brand,
 )
+from link_check.careers_verify import verify_brand_careers
 from link_check.defang import defang_url, parse_host
 
 _SUSPICIOUS_TLDS = ("zip", "mov", "xyz", "top", "cam", "rest")
@@ -19,6 +21,8 @@ _IP_IN_URL = re.compile(r"https?://\d{1,3}(?:\.\d{1,3}){3}", re.I)
 def _risk_level(signals: list[str], verdict: str) -> str:
     if verdict in ("high_risk", "do_not_click"):
         return "high"
+    if verdict == "verify_official_site":
+        return "elevated"
     if "brand_mismatch" in signals or "recruiting_vendor_not_brand" in signals:
         return "elevated"
     if signals:
@@ -26,11 +30,16 @@ def _risk_level(signals: list[str], verdict: str) -> str:
     return "low"
 
 
-def analyze_link(url: str, *, claimed_brand: str = "") -> dict[str, Any]:
+def analyze_link(
+    url: str,
+    *,
+    claimed_brand: str = "",
+    verify_careers: bool = False,
+) -> dict[str, Any]:
     """
     Return structured triage: host, defanged URL, signals, plain summary.
 
-    Does not fetch the URL and does not call the internet.
+    Does not fetch the suspicious URL. Optional careers verify fetches official pages only.
     """
     raw = (url or "").strip()
     if not raw:
@@ -70,12 +79,23 @@ def analyze_link(url: str, *, claimed_brand: str = "") -> dict[str, Any]:
             f"not {brand.get('display')}'s usual domains (examples: {allowed})."
         )
         if is_recruiting_vendor_host(host):
-            signals.append("recruiting_vendor_not_brand")
-            notes.append(
-                f"{host} is a third-party hiring vendor. Some real employers use it, but scammers "
-                "borrow the same story. Open the company's official careers site yourself; do not trust this SMS link."
-            )
-        verdict = "do_not_click"
+            if host_allowed_vendor_for_brand(host, brand):
+                signals.append("known_hiring_vendor_for_brand")
+                notes.append(
+                    f"{host} is a third-party hiring vendor we list for {brand.get('display')}. "
+                    "That can be legitimate, but cold SMS or email links are still risky. "
+                    "Open the official careers site yourself; do not trust an unsolicited link."
+                )
+                verdict = "verify_official_site"
+            else:
+                signals.append("recruiting_vendor_not_brand")
+                notes.append(
+                    f"{host} is a third-party hiring vendor. Some real employers use it, but scammers "
+                    "borrow the same story. Open the company's official careers site yourself; do not trust this SMS link."
+                )
+                verdict = "do_not_click"
+        else:
+            verdict = "do_not_click"
 
     elif claimed_brand and not brand:
         signals.append("unknown_brand_claim")
@@ -94,7 +114,7 @@ def analyze_link(url: str, *, claimed_brand: str = "") -> dict[str, Any]:
 
     plain = _plain_summary(verdict, host, brand, signals, notes)
 
-    return {
+    result: dict[str, Any] = {
         "ok": True,
         "url": raw,
         "host": host,
@@ -105,8 +125,14 @@ def analyze_link(url: str, *, claimed_brand: str = "") -> dict[str, Any]:
         "notes": notes,
         "brand": brand_section,
         "plain_summary": plain,
-        "offline": True,
+        "offline": not verify_careers,
     }
+
+    effective_claimed = claimed_brand or (brand.get("display") if brand else "")
+    if verify_careers and effective_claimed:
+        result["careers_verify"] = verify_brand_careers(effective_claimed, link_host=host)
+
+    return result
 
 
 def _plain_summary(
@@ -116,6 +142,11 @@ def _plain_summary(
     signals: list[str],
     notes: list[str],
 ) -> str:
+    if verdict == "verify_official_site" and brand:
+        return (
+            f"The link goes to {host}, a hiring vendor we associate with {brand.get('display')}. "
+            "That pattern can be real, but scammers copy it. Use the official careers site, not this tap."
+        )
     if verdict == "do_not_click" and brand:
         return (
             f"Stop. The link goes to {host}, not {brand.get('display')}'s own site. "

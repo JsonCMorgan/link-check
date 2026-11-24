@@ -10,7 +10,7 @@
     <header class="wrap">
         <h1>{{ site_name }}</h1>
         <p class="tagline">For any link you were about to tap: texts, emails, social DMs, flyers, or QR codes. We show the <strong>real domain</strong> and whether it matches who they say they are, <strong>without opening the link</strong>.</p>
-        <p class="trust">Offline checks only (brand mismatch, odd URLs, recruiting-site patterns). Not malware scanning or antivirus.</p>
+        <p class="trust">Default: offline checks only. Optional: fetch the employer's official careers page (not your link). Not malware scanning.</p>
     </header>
 
     <main class="wrap card">
@@ -49,6 +49,11 @@
             <input id="claimed" name="claimed_brand" type="text"
                    placeholder="Company or sender name — bank, carrier, employer, store"
                    value="{{ form_claimed or '' }}">
+
+            <label class="check-row">
+                <input type="checkbox" name="verify_careers" value="1" {% if form_verify_careers %}checked{% endif %}>
+                Check official careers page (fetches their site only, never the suspicious link)
+            </label>
 
             <button type="submit" class="primary">Check</button>
         </form>
@@ -90,6 +95,12 @@
                 {% endfor %}
             </ul>
             {% endif %}
+            {% endif %}
+            {% if result.careers_verify and result.careers_verify.get('plain') %}
+            <article class="link-card careers-check">
+                <div class="verdict risk-caution">Official careers page</div>
+                <p class="summary">{{ result.careers_verify.plain }}</p>
+            </article>
             {% endif %}
         </section>
         {% endif %}

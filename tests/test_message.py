@@ -26,7 +26,7 @@ def test_analyze_message_paradox_intact():
     assert r["mode"] == "message"
     assert r["inferred_claimed"] == "Intact Financial"
     assert len(r["results"]) == 2
-    assert r["worst"]["verdict"] == "do_not_click"
+    assert r["worst"]["verdict"] == "verify_official_site"
 
 
 def test_td_bank_in_canada_pack():

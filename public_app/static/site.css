@@ -141,3 +141,15 @@ textarea:focus {
 .link-card .summary { font-size: 0.88rem; margin: 6px 0; }
 .hint { font-size: 0.75rem; color: var(--muted); margin: 6px 0 0; line-height: 1.4; }
 input[type="file"] { color: var(--muted-warm); font-size: 0.85rem; }
+.check-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.82rem;
+    color: var(--muted-warm);
+    margin-top: 12px;
+    line-height: 1.4;
+    cursor: pointer;
+}
+.check-row input { width: auto; margin-top: 3px; accent-color: var(--green); }
+.careers-check { border-left-color: var(--green-dim); }

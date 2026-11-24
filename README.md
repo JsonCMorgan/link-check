@@ -2,7 +2,7 @@
 
 **Public tool:** check links before you click — single URL, full SMS/email/chat, or **QR photo**. Good for smishing, phishing, delivery/bank impersonation, and “wrong company name” links (including hiring messages).
 
-- **No URL fetch** in v0.1  
+- **No fetch of your pasted link** (optional careers-page check fetches the employer's official site only)  
 - **No cloud threat intel** by default  
 - Plain English: brand/domain mismatch, defanged copy for notes  
 
