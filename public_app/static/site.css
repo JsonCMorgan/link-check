@@ -70,3 +70,20 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; }
 .foot { font-size: 0.8rem; color: var(--muted); text-align: center; padding-bottom: 32px; }
 .foot a { color: var(--accent); }
 .prose h2 { font-size: 1rem; color: var(--accent); margin-top: 22px; }
+.mode-tabs { display: flex; gap: 8px; margin-bottom: 4px; }
+.mode-tab {
+    flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: #0a0e14; color: var(--muted); font-weight: 600; cursor: pointer;
+}
+.mode-tab.active { border-color: var(--accent); color: var(--accent); background: #0d2818; }
+.mode-panel.hidden { display: none; }
+textarea {
+    width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: #0a0e14; color: var(--text); font-family: inherit; font-size: 0.95rem;
+    resize: vertical;
+}
+.link-card {
+    margin-top: 14px; padding: 12px; border: 1px solid var(--border); border-radius: 8px;
+    background: #0a0e14;
+}
+.link-card .summary { font-size: 0.88rem; margin: 6px 0; }

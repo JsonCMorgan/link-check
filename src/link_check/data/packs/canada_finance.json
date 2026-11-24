@@ -1,0 +1,30 @@
+{
+  "td": {
+    "display": "TD Bank",
+    "domains": ["td.com", "tdbank.com", "tdcanadatrust.com"]
+  },
+  "rbc": {
+    "display": "RBC",
+    "domains": ["rbc.com", "rbcroyalbank.com"]
+  },
+  "bmo": {
+    "display": "BMO",
+    "domains": ["bmo.com", "bmofinancial.com"]
+  },
+  "scotiabank": {
+    "display": "Scotiabank",
+    "domains": ["scotiabank.com", "scotiaonline.scotiabank.com"]
+  },
+  "cibc": {
+    "display": "CIBC",
+    "domains": ["cibc.com", "cibconline.cibc.com"]
+  },
+  "manulife": {
+    "display": "Manulife",
+    "domains": ["manulife.com", "manulife.ca"]
+  },
+  "sun_life": {
+    "display": "Sun Life",
+    "domains": ["sunlife.com", "sunlife.ca"]
+  }
+}

@@ -23,7 +23,7 @@ Open **http://127.0.0.1:5055** (phone on same Wi‑Fi: `http://<your-pc-ip>:5055
 | Route | Purpose |
 |--------|---------|
 | `/` | Paste form |
-| `/api/check` | `POST` JSON `{ "url", "claimed_brand"? }` |
+| `/api/check` | `POST` JSON `{ "url" }` or `{ "message" }`, optional `claimed_brand` |
 | `/privacy` | Privacy copy |
 | `/health` | Uptime probe |
 
@@ -51,6 +51,18 @@ python -m link_check "https://olivia.paradox.ai/x" --claimed "Intact Financial"
 MSSP can `pip install -e` this package and use `link_triage.py`. Prefer the **public URL** for phone bookmarks once hosted.
 
 ---
+
+## Brand data (feature 2)
+
+- **Default employers:** `src/link_check/data/brands_default.json` (global: Amazon, Microsoft, carriers, etc.)
+- **Optional packs:** `data/packs/canada_finance.json`, `tech_careers.json` (loaded automatically)
+- Disable packs: env `LINK_CHECK_PACKS=none`. Custom list: `LINK_CHECK_PACKS=canada_finance`
+
+## Paste full message (feature 1)
+
+```bash
+python -c "from link_check import analyze_message; import json; print(json.dumps(analyze_message('Intact jobs https://olivia.paradox.ai/x'), indent=2))"
+```
 
 ## Limits
 

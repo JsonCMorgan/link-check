@@ -1,0 +1,22 @@
+{
+  "ibm": {
+    "display": "IBM",
+    "domains": ["ibm.com", "careers.ibm.com"]
+  },
+  "oracle": {
+    "display": "Oracle",
+    "domains": ["oracle.com"]
+  },
+  "salesforce": {
+    "display": "Salesforce",
+    "domains": ["salesforce.com", "force.com"]
+  },
+  "shopify": {
+    "display": "Shopify",
+    "domains": ["shopify.com", "myshopify.com"]
+  },
+  "openai": {
+    "display": "OpenAI",
+    "domains": ["openai.com"]
+  }
+}

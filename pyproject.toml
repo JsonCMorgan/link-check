@@ -17,6 +17,9 @@ public = ["flask>=3.0.0", "gunicorn>=22.0.0"]
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+link_check = ["data/*.json", "data/packs/*.json"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "."]

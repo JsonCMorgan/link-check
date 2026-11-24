@@ -9,35 +9,65 @@
 <body>
     <header class="wrap">
         <h1>{{ site_name }}</h1>
-        <p class="tagline">Paste a job link or text message URL. We compare the <strong>real domain</strong> to who they claim to be — without opening the link.</p>
-        <p class="trust">Offline analysis only. We do not fetch the URL or send it to threat intel clouds.</p>
+        <p class="tagline">Paste a single link or a full SMS/email. We compare the <strong>real domain</strong> to who they claim to be — without opening the link.</p>
+        <p class="trust">Offline analysis. Employer lists use defaults plus optional regional packs (not tied to any one conference).</p>
     </header>
 
     <main class="wrap card">
         <form method="post" action="/check" class="stack">
-            <label for="url">Link URL</label>
-            <input id="url" name="url" type="url" inputmode="url" required
-                   placeholder="https://..." value="{{ form_url or '' }}" autocomplete="off">
+            <input type="hidden" name="mode" id="mode" value="{{ form_mode or 'url' }}">
+            <div class="mode-tabs" role="tablist">
+                <button type="button" class="mode-tab {% if (form_mode or 'url') == 'url' %}active{% endif %}" data-mode="url">Single URL</button>
+                <button type="button" class="mode-tab {% if form_mode == 'message' %}active{% endif %}" data-mode="message">Full message</button>
+            </div>
 
-            <label for="claimed">They said they were (optional)</label>
+            <div id="panel-url" class="mode-panel {% if (form_mode or 'url') != 'url' %}hidden{% endif %}">
+                <label for="url">Link URL</label>
+                <input id="url" name="url" type="url" inputmode="url"
+                       placeholder="https://..." value="{{ form_url or '' }}" autocomplete="off">
+            </div>
+
+            <div id="panel-message" class="mode-panel {% if (form_mode or 'url') != 'message' %}hidden{% endif %}">
+                <label for="message">Paste SMS / email text</label>
+                <textarea id="message" name="message" rows="6"
+                          placeholder="Example: Intact Financial has roles for you. Apply: https://...">{{ form_message or '' }}</textarea>
+            </div>
+
+            <label for="claimed">They said they were (optional override)</label>
             <input id="claimed" name="claimed_brand" type="text"
-                   placeholder="e.g. Intact Financial, Microsoft"
+                   placeholder="e.g. Intact Financial — we can also infer from the message"
                    value="{{ form_claimed or '' }}">
 
-            <button type="submit" class="primary">Check link</button>
+            <button type="submit" class="primary">Check</button>
         </form>
 
         {% if result %}
-        <section class="result {% if result.ok %}show{% endif %}" aria-live="polite">
+        <section class="result show" aria-live="polite">
             {% if not result.ok %}
             <p class="err">{{ result.error }}</p>
+            {% elif result.mode == 'message' %}
+            <div class="verdict risk-{{ result.risk_level or 'low' }}">
+                Risk: {{ (result.risk_level or 'low')|upper }} · {{ (result.verdict or '')|replace('_', ' ') }}
+            </div>
+            <p class="summary">{{ result.plain_summary }}</p>
+            {% if result.inferred_claimed %}
+            <p class="meta">Inferred employer: <code>{{ result.inferred_claimed }}</code></p>
+            {% endif %}
+            <p class="meta">{{ result.urls_found|length }} link(s) found</p>
+            {% for row in result.results %}
+            <article class="link-card">
+                <div class="verdict risk-{{ row.risk_level or 'low' }}">{{ row.verdict|replace('_', ' ') }} · {{ row.host }}</div>
+                <p class="summary">{{ row.plain_summary }}</p>
+                <p class="defanged"><code>{{ row.defanged }}</code></p>
+            </article>
+            {% endfor %}
             {% else %}
             <div class="verdict risk-{{ result.risk_level or 'low' }}">
                 Risk: {{ (result.risk_level or 'low')|upper }} · {{ result.verdict|replace('_', ' ') }}
             </div>
             <p class="summary">{{ result.plain_summary }}</p>
             <p class="meta">Host: <code>{{ result.host }}</code></p>
-            <p class="defanged">Defanged (safe to paste): <code>{{ result.defanged }}</code></p>
+            <p class="defanged">Defanged: <code>{{ result.defanged }}</code></p>
             {% if result.notes %}
             <ul class="notes">
                 {% for n in result.notes %}
@@ -53,9 +83,20 @@
     <footer class="wrap foot">
         <a href="/privacy">Privacy</a>
         <span>·</span>
-        <span>Not antivirus — hiring scam &amp; brand-mismatch helper.</span>
+        <span>Hiring scam &amp; brand-mismatch helper.</span>
         <span>·</span>
         <a href="https://github.com/JsonCMorgan/link-check">Source</a>
     </footer>
+    <script>
+        document.querySelectorAll('.mode-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+                document.getElementById('mode').value = mode;
+                document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('active', b === btn));
+                document.getElementById('panel-url').classList.toggle('hidden', mode !== 'url');
+                document.getElementById('panel-message').classList.toggle('hidden', mode !== 'message');
+            });
+        });
+    </script>
 </body>
 </html>

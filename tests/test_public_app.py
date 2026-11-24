@@ -37,3 +37,16 @@ def test_index_html(web_client):
     r = web_client.get("/")
     assert r.status_code == 200
     assert b"Link Check" in r.data
+
+
+def test_api_message_mode(web_client):
+    r = web_client.post(
+        "/api/check",
+        json={
+            "message": "Intact Financial apply https://olivia.paradox.ai/x",
+        },
+    )
+    assert r.status_code == 200
+    data = r.get_json()
+    assert data["mode"] == "message"
+    assert data["worst"]["verdict"] == "do_not_click"

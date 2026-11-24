@@ -14,6 +14,7 @@ from typing import Any
 from flask import Flask, jsonify, render_template, request
 
 from link_check.analyze import analyze_link
+from link_check.message import analyze_message
 
 app = Flask(
     __name__,
@@ -44,13 +45,19 @@ def _rate_ok(ip: str) -> bool:
 
 
 def _check_payload(data: dict[str, Any]) -> tuple[dict[str, Any], int]:
-    url = (data.get("url") or "").strip()
-    claimed = (data.get("claimed_brand") or data.get("claimed") or "").strip()
-    if not url:
-        return {"ok": False, "error": "Paste a URL to check."}, 400
     ip = _client_ip()
     if not _rate_ok(ip):
         return {"ok": False, "error": "Too many checks; wait a minute and try again."}, 429
+
+    message = (data.get("message") or data.get("text") or "").strip()
+    claimed = (data.get("claimed_brand") or data.get("claimed") or "").strip()
+
+    if message:
+        return analyze_message(message, claimed_brand=claimed), 200
+
+    url = (data.get("url") or "").strip()
+    if not url:
+        return {"ok": False, "error": "Paste a URL or full message with links."}, 400
     return analyze_link(url, claimed_brand=claimed), 200
 
 
@@ -81,9 +88,11 @@ def api_check():
 @app.route("/check", methods=["POST"])
 def form_check():
     """HTML form post (no JS required)."""
+    mode = (request.form.get("mode") or "url").strip().lower()
     data = {
-        "url": request.form.get("url") or "",
         "claimed_brand": request.form.get("claimed_brand") or "",
+        "url": request.form.get("url") or "",
+        "message": request.form.get("message") or "" if mode == "message" else "",
     }
     result, status = _check_payload(data)
     if request.accept_mimetypes.best == "application/json":
@@ -92,7 +101,9 @@ def form_check():
         "index.html",
         site_name="Link Check",
         result=result,
+        form_mode=mode,
         form_url=data["url"],
+        form_message=data.get("message") or "",
         form_claimed=data["claimed_brand"],
     ), status if status != 200 else 200
 

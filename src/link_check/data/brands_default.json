@@ -1,0 +1,42 @@
+{
+  "intact": {
+    "display": "Intact Financial",
+    "domains": ["intact.ca", "intact.com", "intact.net", "intactfinancial.com", "intactfc.com"]
+  },
+  "microsoft": {
+    "display": "Microsoft",
+    "domains": ["microsoft.com", "microsoftonline.com", "live.com", "office.com", "outlook.com"]
+  },
+  "google": {
+    "display": "Google",
+    "domains": ["google.com", "youtube.com", "gmail.com", "googleapis.com"]
+  },
+  "amazon": {
+    "display": "Amazon",
+    "domains": ["amazon.com", "amazon.ca", "aws.amazon.com", "aboutamazon.com"]
+  },
+  "apple": {
+    "display": "Apple",
+    "domains": ["apple.com", "icloud.com"]
+  },
+  "meta": {
+    "display": "Meta",
+    "domains": ["meta.com", "facebook.com", "instagram.com", "fb.com"]
+  },
+  "linkedin": {
+    "display": "LinkedIn",
+    "domains": ["linkedin.com", "lnkd.in"]
+  },
+  "fedex": {
+    "display": "FedEx",
+    "domains": ["fedex.com", "fedex.ca"]
+  },
+  "ups": {
+    "display": "UPS",
+    "domains": ["ups.com"]
+  },
+  "paypal": {
+    "display": "PayPal",
+    "domains": ["paypal.com", "paypal.ca"]
+  }
+}
