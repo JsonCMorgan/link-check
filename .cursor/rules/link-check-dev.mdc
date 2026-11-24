@@ -1,0 +1,35 @@
+---
+description: Link Check public app — restart and verify after local UI/package changes
+globs:
+  - public_app/**
+  - src/link_check/**
+  - scripts/**
+---
+
+# Link Check local dev (port 5055)
+
+When you change `public_app/`, `src/link_check/`, or dependencies:
+
+1. **Do not** tell Jason to refresh only. Old Flask processes often keep serving stale HTML (duplicate listeners on **5055** are common).
+2. **Run** from repo root:
+   ```powershell
+   .\scripts\restart-public-app.ps1
+   ```
+   For a detached server (e.g. after agent work):
+   ```powershell
+   .\scripts\restart-public-app.ps1 -Background
+   ```
+3. **Verify** the live page, not just the file on disk:
+   ```powershell
+   (Invoke-WebRequest -UseBasicParsing http://127.0.0.1:5055/).Content | Select-String "QR code"
+   ```
+   (Adjust the string when the change is not QR-related.)
+4. **Remind Jason** to hard refresh (Ctrl+Shift+R) or use a private window.
+
+## Install rule
+
+After **package** or `pyproject.toml` changes, `restart-public-app.ps1` runs `pip install -e ".[public,dev]"` unless `-SkipInstall`.
+
+## One listener
+
+Only one process should LISTEN on 5055. If updates “do nothing,” kill all listeners then restart (this script does that).

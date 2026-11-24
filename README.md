@@ -20,6 +20,17 @@ python public_app/app.py
 
 Open **http://127.0.0.1:5055** (phone on same Wi‑Fi: `http://<your-pc-ip>:5055`).
 
+### After local code changes
+
+Flask does not always pick up template/CSS edits if an old process is still on **5055** (two listeners = stale UI in the browser).
+
+```powershell
+cd C:\Dev\link-check
+.\scripts\restart-public-app.ps1
+```
+
+Then hard refresh the page (Ctrl+Shift+R). Background restart for agents: `.\scripts\restart-public-app.ps1 -Background`.
+
 | Route | Purpose |
 |--------|---------|
 | `/` | Paste form |
