@@ -52,7 +52,11 @@
 
             <label class="check-row">
                 <input type="checkbox" name="verify_careers" value="1" {% if form_verify_careers %}checked{% endif %}>
-                Look up careers online (finds links on their domains, never opens your pasted link)
+                Look up careers on employer websites (crawl their domains only; never your pasted link)
+            </label>
+            <label class="check-row">
+                <input type="checkbox" name="web_search" value="1" {% if form_web_search %}checked{% endif %}>
+                Search the web for official careers links (Serper / Brave / SearXNG; company name sent to provider)
             </label>
 
             <button type="submit" class="primary">Check</button>
@@ -110,6 +114,13 @@
                 {% endif %}
                 {% if result.careers_verify.careers_urls_used %}
                 <p class="meta">Fetched: {% for u in result.careers_verify.careers_urls_used[:4] %}<code>{{ u }}</code>{% if not loop.last %}; {% endif %}{% endfor %}</p>
+                {% endif %}
+                {% if result.careers_verify.web_search and result.careers_verify.web_search.hits %}
+                <p class="meta">Web search ({{ result.careers_verify.web_search.provider }}):
+                    {% for h in result.careers_verify.web_search.hits[:3] %}
+                    <a href="{{ h.url }}" rel="noopener noreferrer">{{ h.title or h.url }}</a>{% if not loop.last %}; {% endif %}
+                    {% endfor %}
+                </p>
                 {% endif %}
             </article>
             {% elif not result.careers_verify %}

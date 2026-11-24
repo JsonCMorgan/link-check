@@ -13,7 +13,8 @@
 
         <h2>What we do with your input</h2>
         <p>By default, your URL, message text, or QR image is processed <strong>on the server in memory</strong>. We <strong>do not</strong> open the suspicious link.</p>
-        <p>If you tick <strong>Check official careers page</strong>, we HTTP-fetch only URLs listed in our employer config (for example <code>careers.intactfc.com</code> for Intact). We never fetch the link you pasted. We scan that HTML for hiring-vendor names. Your hosting provider may log those outbound requests.</p>
+        <p><strong>Employer site crawl</strong> (first checkbox): we HTTP-fetch only that company's domains and careers paths. We never fetch the link you pasted.</p>
+        <p><strong>Web search</strong> (second checkbox): we send the company name (and sometimes a known domain) to Serper, Brave, or your self-hosted SearXNG. We do not send your suspicious link to those services. Search results are ranked and on-brand careers URLs may be fetched next. See <code>docs/WEB_SEARCH_SETUP.md</code> in the repo.</p>
         <p>We <strong>do not</strong> send your paste to VirusTotal, Google Safe Browsing, or similar.</p>
         <p>QR photos are decoded in memory and discarded. They are not written to disk as part of the check.</p>
 

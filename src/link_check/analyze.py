@@ -35,6 +35,7 @@ def analyze_link(
     *,
     claimed_brand: str = "",
     verify_careers: bool = False,
+    web_search: bool = False,
 ) -> dict[str, Any]:
     """
     Return structured triage: host, defanged URL, signals, plain summary.
@@ -129,8 +130,13 @@ def analyze_link(
     }
 
     effective_claimed = claimed_brand or (brand.get("display") if brand else "")
-    if verify_careers and effective_claimed:
-        result["careers_verify"] = verify_brand_careers(effective_claimed, link_host=host)
+    if (verify_careers or web_search) and effective_claimed:
+        result["careers_verify"] = verify_brand_careers(
+            effective_claimed,
+            link_host=host,
+            discover=verify_careers,
+            web_search=web_search,
+        )
 
     return result
 

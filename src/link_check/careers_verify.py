@@ -11,6 +11,7 @@ from urllib.request import Request, urlopen
 
 from link_check.brands import careers_page_urls, host_matches_brand, resolve_brand
 from link_check.careers_discover import discover_careers_urls
+from link_check.web_search import web_search_careers
 
 _MAX_BYTES = 512_000
 _TIMEOUT_SEC = 10
@@ -90,6 +91,7 @@ def verify_brand_careers(
     link_host: str = "",
     fetch: Callable[[str], tuple[int, bytes, str]] | None = None,
     discover: bool = True,
+    web_search: bool = False,
 ) -> dict[str, Any]:
     """
     Fetch configured careers URLs for the brand and scan HTML for hiring vendors.
@@ -109,6 +111,13 @@ def verify_brand_careers(
     configured = careers_page_urls(brand)
     discovery: dict[str, Any] | None = None
     discovered_urls: list[str] = []
+    web: dict[str, Any] | None = None
+    search_urls: list[str] = []
+
+    if web_search:
+        web = web_search_careers(claimed_brand)
+        if web.get("ok"):
+            search_urls = list(web.get("careers_candidates") or [])
 
     if discover:
         discovery = discover_careers_urls(brand, do_fetch)
@@ -116,13 +125,17 @@ def verify_brand_careers(
 
     urls: list[str] = []
     seen: set[str] = set()
-    for u in configured + discovered_urls:
+    for u in configured + discovered_urls + search_urls:
         if u not in seen:
             seen.add(u)
             urls.append(u)
 
     url_source = "config"
-    if configured and discovered_urls:
+    if search_urls and (configured or discovered_urls):
+        url_source = "mixed"
+    elif search_urls:
+        url_source = "web_search"
+    elif configured and discovered_urls:
         url_source = "config_and_discovered"
     elif discovered_urls:
         url_source = "discovered"
@@ -131,14 +144,18 @@ def verify_brand_careers(
         plain = f"No careers URLs found for {brand.get('display')}."
         if discovery:
             plain = discovery.get("plain") or plain
-        return {
+        payload: dict[str, Any] = {
             "ok": False,
             "skipped": True,
             "reason": "no_careers_urls",
             "plain": plain,
             "discovery": discovery,
+            "web_search": web,
             "internet": True,
         }
+        if web and not web.get("ok") and web.get("plain"):
+            payload["plain"] = web["plain"]
+        return payload
     pages: list[dict[str, Any]] = []
     all_vendors: set[str] = set()
 
@@ -200,6 +217,9 @@ def verify_brand_careers(
             + "."
         )
 
+    if web and web.get("plain"):
+        plain = f"{web['plain']} {plain}"
+
     return {
         "ok": True,
         "brand": display,
@@ -207,8 +227,10 @@ def verify_brand_careers(
         "careers_urls_used": urls,
         "url_source": url_source,
         "discovered_urls": discovered_urls,
+        "search_urls": search_urls,
         "configured_urls": configured,
         "discovery": discovery,
+        "web_search": web,
         "vendors_on_careers_site": sorted(all_vendors),
         "link_host": link_host,
         "vendor_matches_link_host": matches,

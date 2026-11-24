@@ -63,6 +63,7 @@ def _check_payload(
 
     claimed = (data.get("claimed_brand") or data.get("claimed") or "").strip()
     verify_careers = _verify_careers_on(data)
+    web_search = _verify_careers_on({"verify_careers": data.get("web_search")})
 
     if qr_bytes or (data.get("qr_paste") or "").strip():
         return (
@@ -71,18 +72,35 @@ def _check_payload(
                 claimed_brand=claimed,
                 pasted_url=(data.get("qr_paste") or "").strip(),
                 verify_careers=verify_careers,
+                web_search=web_search,
             ),
             200,
         )
 
     message = (data.get("message") or data.get("text") or "").strip()
     if message:
-        return analyze_message(message, claimed_brand=claimed, verify_careers=verify_careers), 200
+        return (
+            analyze_message(
+                message,
+                claimed_brand=claimed,
+                verify_careers=verify_careers,
+                web_search=web_search,
+            ),
+            200,
+        )
 
     url = (data.get("url") or "").strip()
     if not url:
         return {"ok": False, "error": "Paste a URL, message, or QR image."}, 400
-    return analyze_link(url, claimed_brand=claimed, verify_careers=verify_careers), 200
+    return (
+        analyze_link(
+            url,
+            claimed_brand=claimed,
+            verify_careers=verify_careers,
+            web_search=web_search,
+        ),
+        200,
+    )
 
 
 @app.route("/")
@@ -123,6 +141,7 @@ def form_check():
         "message": request.form.get("message") or "" if mode == "message" else "",
         "qr_paste": request.form.get("qr_paste") or "" if mode == "qr" else "",
         "verify_careers": request.form.get("verify_careers"),
+        "web_search": request.form.get("web_search"),
     }
     result, status = _check_payload(data, qr_bytes=qr_bytes if mode == "qr" else None)
     if request.accept_mimetypes.best == "application/json":
@@ -137,6 +156,7 @@ def form_check():
         form_qr_paste=data.get("qr_paste") or "",
         form_claimed=data["claimed_brand"],
         form_verify_careers=_verify_careers_on(data),
+        form_web_search=_verify_careers_on({"verify_careers": data.get("web_search")}),
     ), status if status != 200 else 200
 
 

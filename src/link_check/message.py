@@ -63,6 +63,7 @@ def analyze_message(
     *,
     claimed_brand: str = "",
     verify_careers: bool = False,
+    web_search: bool = False,
 ) -> dict[str, Any]:
     """Analyze every URL in a message; merge inferred employer name."""
     raw = (text or "").strip()
@@ -115,11 +116,13 @@ def analyze_message(
         "verdict": worst.get("verdict"),
         "offline": not verify_careers,
     }
-    if verify_careers and effective:
+    if (verify_careers or web_search) and effective:
         from link_check.careers_verify import verify_brand_careers
 
         out["careers_verify"] = verify_brand_careers(
             effective,
             link_host=str(worst.get("host") or ""),
+            discover=verify_careers,
+            web_search=web_search,
         )
     return out
