@@ -8,6 +8,8 @@
 
 Standalone from [Boundry MSSP](https://github.com/JsonCMorgan/boundry-ai-soc-platform). Recruiters and job seekers get one job, not a SOC dashboard.
 
+**Recruiter / mentor demo:** [docs/DEMO.md](docs/DEMO.md) (Serper free tier is enough for casual demos; no scaling needed yet).
+
 ---
 
 ## Public web app (Option 1)
