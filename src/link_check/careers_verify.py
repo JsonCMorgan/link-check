@@ -10,9 +10,11 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from link_check.brands import careers_page_urls, host_matches_brand, resolve_brand
+from link_check.careers_discover import discover_careers_urls
 
 _MAX_BYTES = 512_000
 _TIMEOUT_SEC = 10
+_MAX_VERIFY_PAGES = 4
 _USER_AGENT = "LinkCheck/0.2 careers-verify (+https://github.com/JsonCMorgan/link-check)"
 
 _VENDOR_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
@@ -87,6 +89,7 @@ def verify_brand_careers(
     *,
     link_host: str = "",
     fetch: Callable[[str], tuple[int, bytes, str]] | None = None,
+    discover: bool = True,
 ) -> dict[str, Any]:
     """
     Fetch configured careers URLs for the brand and scan HTML for hiring vendors.
@@ -102,20 +105,44 @@ def verify_brand_careers(
             "plain": "Add a company name we recognize to enable careers-page check.",
         }
 
-    urls = careers_page_urls(brand)
+    do_fetch = fetch or _default_fetch
+    configured = careers_page_urls(brand)
+    discovery: dict[str, Any] | None = None
+    discovered_urls: list[str] = []
+
+    if discover:
+        discovery = discover_careers_urls(brand, do_fetch)
+        discovered_urls = list(discovery.get("urls") or [])
+
+    urls: list[str] = []
+    seen: set[str] = set()
+    for u in configured + discovered_urls:
+        if u not in seen:
+            seen.add(u)
+            urls.append(u)
+
+    url_source = "config"
+    if configured and discovered_urls:
+        url_source = "config_and_discovered"
+    elif discovered_urls:
+        url_source = "discovered"
+
     if not urls:
+        plain = f"No careers URLs found for {brand.get('display')}."
+        if discovery:
+            plain = discovery.get("plain") or plain
         return {
             "ok": False,
             "skipped": True,
             "reason": "no_careers_urls",
-            "plain": f"No official careers URL is configured for {brand.get('display')}.",
+            "plain": plain,
+            "discovery": discovery,
+            "internet": True,
         }
-
-    do_fetch = fetch or _default_fetch
     pages: list[dict[str, Any]] = []
     all_vendors: set[str] = set()
 
-    for url in urls:
+    for url in urls[:_MAX_VERIFY_PAGES]:
         if not _url_allowed_for_brand(url, brand):
             pages.append({"url": url, "error": "blocked_url_not_on_brand_domains"})
             continue
@@ -166,13 +193,26 @@ def verify_brand_careers(
             "Compare that to your link host. This does not prove this exact URL is authentic."
         )
 
+    if discovery and discovered_urls:
+        plain = (
+            f"{plain} Live discovery found: {', '.join(discovered_urls[:3])}"
+            + (" …" if len(discovered_urls) > 3 else "")
+            + "."
+        )
+
     return {
         "ok": True,
         "brand": display,
         "pages": pages,
+        "careers_urls_used": urls,
+        "url_source": url_source,
+        "discovered_urls": discovered_urls,
+        "configured_urls": configured,
+        "discovery": discovery,
         "vendors_on_careers_site": sorted(all_vendors),
         "link_host": link_host,
         "vendor_matches_link_host": matches,
         "plain": plain,
         "opt_in": True,
+        "internet": True,
     }

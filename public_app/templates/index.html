@@ -52,7 +52,7 @@
 
             <label class="check-row">
                 <input type="checkbox" name="verify_careers" value="1" {% if form_verify_careers %}checked{% endif %}>
-                Check official careers page (fetches their site only, never the suspicious link)
+                Look up careers online (finds links on their domains, never opens your pasted link)
             </label>
 
             <button type="submit" class="primary">Check</button>
@@ -98,9 +98,22 @@
             {% endif %}
             {% if result.careers_verify and result.careers_verify.get('plain') %}
             <article class="link-card careers-check">
-                <div class="verdict risk-caution">Official careers page</div>
+                <div class="verdict risk-caution">Live careers check</div>
+                {% if result.careers_verify.internet %}
+                <p class="hint">Used the internet: employer-owned sites only (no Google, no VirusTotal).</p>
+                {% endif %}
                 <p class="summary">{{ result.careers_verify.plain }}</p>
+                {% if result.careers_verify.discovered_urls %}
+                <p class="meta">Discovered URLs:
+                    {% for u in result.careers_verify.discovered_urls[:5] %}<code>{{ u }}</code>{% if not loop.last %}; {% endif %}{% endfor %}
+                </p>
+                {% endif %}
+                {% if result.careers_verify.careers_urls_used %}
+                <p class="meta">Fetched: {% for u in result.careers_verify.careers_urls_used[:4] %}<code>{{ u }}</code>{% if not loop.last %}; {% endif %}{% endfor %}</p>
+                {% endif %}
             </article>
+            {% elif not result.careers_verify %}
+            <p class="hint">Offline check only. Turn on careers lookup above for live discovery.</p>
             {% endif %}
         </section>
         {% endif %}

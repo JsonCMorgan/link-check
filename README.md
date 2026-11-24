@@ -34,7 +34,7 @@ Then hard refresh the page (Ctrl+Shift+R). Background restart for agents: `.\scr
 | Route | Purpose |
 |--------|---------|
 | `/` | Paste form |
-| `/api/check` | `POST` JSON `{ "url" }`, `{ "message" }`, or `{ "qr_paste" }`, optional `claimed_brand` (QR image upload via form only in v0.1) |
+| `/api/check` | `POST` JSON `{ "url" }`, `{ "message" }`, or `{ "qr_paste" }`, optional `claimed_brand`, `verify_careers: true` for live careers discovery (employer domains only) |
 | `/privacy` | Privacy copy |
 | `/health` | Uptime probe |
 
