@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ site_name }} — before you click</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='site.css') }}">
+</head>
+<body>
+    <header class="wrap">
+        <h1>{{ site_name }}</h1>
+        <p class="tagline">Paste a job link or text message URL. We compare the <strong>real domain</strong> to who they claim to be — without opening the link.</p>
+        <p class="trust">Offline analysis only. We do not fetch the URL or send it to threat intel clouds.</p>
+    </header>
+
+    <main class="wrap card">
+        <form method="post" action="/check" class="stack">
+            <label for="url">Link URL</label>
+            <input id="url" name="url" type="url" inputmode="url" required
+                   placeholder="https://..." value="{{ form_url or '' }}" autocomplete="off">
+
+            <label for="claimed">They said they were (optional)</label>
+            <input id="claimed" name="claimed_brand" type="text"
+                   placeholder="e.g. Intact Financial, Microsoft"
+                   value="{{ form_claimed or '' }}">
+
+            <button type="submit" class="primary">Check link</button>
+        </form>
+
+        {% if result %}
+        <section class="result {% if result.ok %}show{% endif %}" aria-live="polite">
+            {% if not result.ok %}
+            <p class="err">{{ result.error }}</p>
+            {% else %}
+            <div class="verdict risk-{{ result.risk_level or 'low' }}">
+                Risk: {{ (result.risk_level or 'low')|upper }} · {{ result.verdict|replace('_', ' ') }}
+            </div>
+            <p class="summary">{{ result.plain_summary }}</p>
+            <p class="meta">Host: <code>{{ result.host }}</code></p>
+            <p class="defanged">Defanged (safe to paste): <code>{{ result.defanged }}</code></p>
+            {% if result.notes %}
+            <ul class="notes">
+                {% for n in result.notes %}
+                <li>{{ n }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endif %}
+        </section>
+        {% endif %}
+    </main>
+
+    <footer class="wrap foot">
+        <a href="/privacy">Privacy</a>
+        <span>·</span>
+        <span>Not antivirus — hiring scam &amp; brand-mismatch helper.</span>
+        <span>·</span>
+        <a href="https://github.com/JsonCMorgan/link-check">Source</a>
+    </footer>
+</body>
+</html>

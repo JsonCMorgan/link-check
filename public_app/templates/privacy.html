@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy — {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='site.css') }}">
+</head>
+<body>
+    <main class="wrap card prose">
+        <h1>Privacy</h1>
+        <p><a href="/">← Back to {{ site_name }}</a></p>
+
+        <h2>What we do with your paste</h2>
+        <p>In version 0.1, your URL is parsed <strong>on the server in memory</strong> to extract the hostname and compare it to the company name you optionally enter. We <strong>do not</strong> HTTP-fetch the link. We <strong>do not</strong> send the URL to VirusTotal, Google Safe Browsing, or similar services unless a future version adds an explicit opt-in button (none today).</p>
+
+        <h2>Logs</h2>
+        <p>We do not persist full URLs in a database in v0.1. Hosting providers may log HTTP requests (IP, path) in standard web logs. Check your host’s policy if you self-deploy.</p>
+
+        <h2>Rate limits</h2>
+        <p>Public instance applies a simple per-IP rate limit to reduce abuse.</p>
+
+        <h2>Not legal advice</h2>
+        <p>Output is educational heuristics for job seekers and analysts. When in doubt, open the company’s official website yourself.</p>
+    </main>
+</body>
+</html>

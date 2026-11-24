@@ -12,10 +12,11 @@ license = { text = "MIT" }
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+public = ["flask>=3.0.0", "gunicorn>=22.0.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = ["src", "."]

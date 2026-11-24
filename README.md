@@ -1,38 +1,60 @@
-# Link Check (offline)
+# Link Check
 
-Check a URL **before you click** — brand/domain mismatch, basic phish heuristics, defanged copy. **No URL fetch, no cloud API** in v0.1.
+**Public tool:** paste a URL before you click (job scams, conference follow-ups, “wrong company name” links).
 
-## CLI (computer)
+- **No URL fetch** in v0.1  
+- **No cloud threat intel** by default  
+- Plain English: brand/domain mismatch, defanged copy for notes  
+
+Standalone from [Boundry MSSP](https://github.com/JsonCMorgan/boundry-ai-soc-platform). Recruiters and job seekers get one job, not a SOC dashboard.
+
+---
+
+## Public web app (Option 1)
+
+```powershell
+cd C:\Dev\link-check
+pip install -e ".[public,dev]"
+python public_app/app.py
+```
+
+Open **http://127.0.0.1:5055** (phone on same Wi‑Fi: `http://<your-pc-ip>:5055`).
+
+| Route | Purpose |
+|--------|---------|
+| `/` | Paste form |
+| `/api/check` | `POST` JSON `{ "url", "claimed_brand"? }` |
+| `/privacy` | Privacy copy |
+| `/health` | Uptime probe |
+
+### Deploy (pick one)
+
+1. **Docker:** `docker build -t link-check .` → run on Fly.io / Railway / any host port 8080.  
+2. **Gunicorn:** `gunicorn -b 0.0.0.0:8080 public_app.app:app`  
+3. Set `PORT` env var (Railway/Render set this automatically).
+
+Point a domain when ready (e.g. `linkcheck.yourdomain.com`). Update footer GitHub link after first push to `JsonCMorgan/link-check`.
+
+---
+
+## CLI (developers)
 
 ```bash
 pip install -e ".[dev]"
-python -m link_check "https://olivia.paradox.ai/candidates/apply/x" --claimed "Intact Financial"
-python -m link_check "https://careers.intact.ca/job" --claimed "Intact Financial" --json
+python -m link_check "https://olivia.paradox.ai/x" --claimed "Intact Financial"
 ```
 
-## Boundry API (phone on home LAN)
+---
 
-With Flask running on your PC and phone on the same network (or Tailscale):
+## Boundry integration (optional)
 
-- **Page:** `http://<your-pc>:5000/ops/link-check`
-- **API:** `POST /api/ops/link-check`  
-  JSON: `{"url": "...", "claimed_brand": "Intact Financial"}`
+MSSP can `pip install -e` this package and use `link_triage.py`. Prefer the **public URL** for phone bookmarks once hosted.
 
-## iOS Shortcut (sketch)
-
-1. **Get Contents of URL** — POST to `http://10.x.x.x:5000/api/ops/link-check`  
-   Headers: `Content-Type: application/json`  
-   Body: `{"url": "<Shortcut Input>", "claimed_brand": "<optional>"}`  
-   (You must be logged into Boundry in Safari first, or add a personal API token later.)
-2. **Get Dictionary Value** `plain_summary` from JSON.
-3. **Show Result**.
-
-Easier path: Shortcut **Open URL** → `http://<pc>:5000/ops/link-check` and paste in the form.
+---
 
 ## Limits
 
-- Does not prove malware; flags **obvious social-engineering patterns** (wrong domain for claimed brand).
-- Third-party hiring links (e.g. Paradox) can be legitimate — output tells you to verify on the official site.
+Does not prove malware. Flags **social engineering patterns** (e.g. “Intact” text → `paradox.ai` link). Third-party hiring vendors can be legitimate; always verify on the company’s **official** careers site.
 
 ## License
 
