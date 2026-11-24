@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ site_name }} — before you click</title>
+    <title>{{ site_name }} — check links before you click</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='site.css') }}">
 </head>
 <body>
     <header class="wrap">
         <h1>{{ site_name }}</h1>
-        <p class="tagline">Paste a single link or a full SMS/email. We compare the <strong>real domain</strong> to who they claim to be — without opening the link.</p>
-        <p class="trust">Offline analysis. Employer lists use defaults plus optional regional packs (not tied to any one conference).</p>
+        <p class="tagline">For any link you were about to tap: texts, emails, social DMs, flyers, or QR codes. We show the <strong>real domain</strong> and whether it matches who they say they are, <strong>without opening the link</strong>.</p>
+        <p class="trust">Offline checks only (brand mismatch, odd URLs, recruiting-site patterns). Not malware scanning or antivirus.</p>
     </header>
 
     <main class="wrap card">
-        <form method="post" action="/check" class="stack">
+        <form method="post" action="/check" class="stack" enctype="multipart/form-data">
             <input type="hidden" name="mode" id="mode" value="{{ form_mode or 'url' }}">
             <div class="mode-tabs" role="tablist">
                 <button type="button" class="mode-tab {% if (form_mode or 'url') == 'url' %}active{% endif %}" data-mode="url">Single URL</button>
                 <button type="button" class="mode-tab {% if form_mode == 'message' %}active{% endif %}" data-mode="message">Full message</button>
+                <button type="button" class="mode-tab {% if form_mode == 'qr' %}active{% endif %}" data-mode="qr">QR code</button>
             </div>
 
             <div id="panel-url" class="mode-panel {% if (form_mode or 'url') != 'url' %}hidden{% endif %}">
@@ -28,14 +29,25 @@
             </div>
 
             <div id="panel-message" class="mode-panel {% if (form_mode or 'url') != 'message' %}hidden{% endif %}">
-                <label for="message">Paste SMS / email text</label>
+                <label for="message">Paste SMS / email / chat text</label>
                 <textarea id="message" name="message" rows="6"
-                          placeholder="Example: Intact Financial has roles for you. Apply: https://...">{{ form_message or '' }}</textarea>
+                          placeholder="Paste the full message including any links — job offers, delivery alerts, banking notices, etc.">{{ form_message or '' }}</textarea>
             </div>
 
-            <label for="claimed">They said they were (optional override)</label>
+            <div id="panel-qr" class="mode-panel {% if (form_mode or 'url') != 'qr' %}hidden{% endif %}">
+                <label for="qr_image">Upload QR photo or screenshot (PNG/JPG)</label>
+                <input id="qr_image" name="qr_image" type="file" accept="image/*" capture="environment">
+
+                <label for="qr_paste" style="margin-top:14px;">Or paste the URL your QR would open</label>
+                <input id="qr_paste" name="qr_paste" type="url" inputmode="url"
+                       placeholder="If upload fails, paste the link shown in your camera app"
+                       value="{{ form_qr_paste or '' }}" autocomplete="off">
+                <p class="hint">We decode the image on your machine. The image is not stored.</p>
+            </div>
+
+            <label for="claimed">They said they were from (optional)</label>
             <input id="claimed" name="claimed_brand" type="text"
-                   placeholder="e.g. Intact Financial — we can also infer from the message"
+                   placeholder="Company or sender name — bank, carrier, employer, store"
                    value="{{ form_claimed or '' }}">
 
             <button type="submit" class="primary">Check</button>
@@ -45,15 +57,18 @@
         <section class="result show" aria-live="polite">
             {% if not result.ok %}
             <p class="err">{{ result.error }}</p>
-            {% elif result.mode == 'message' %}
+            {% elif result.mode in ('message', 'qr') and result.results %}
             <div class="verdict risk-{{ result.risk_level or 'low' }}">
                 Risk: {{ (result.risk_level or 'low')|upper }} · {{ (result.verdict or '')|replace('_', ' ') }}
             </div>
             <p class="summary">{{ result.plain_summary }}</p>
-            {% if result.inferred_claimed %}
-            <p class="meta">Inferred employer: <code>{{ result.inferred_claimed }}</code></p>
+            {% if result.qr_payloads %}
+            <p class="meta">QR decoded: {% for p in result.qr_payloads %}<code>{{ p }}</code>{% if not loop.last %}; {% endif %}{% endfor %}</p>
             {% endif %}
-            <p class="meta">{{ result.urls_found|length }} link(s) found</p>
+            {% if result.inferred_claimed %}
+            <p class="meta">Matched name in text: <code>{{ result.inferred_claimed }}</code></p>
+            {% endif %}
+            <p class="meta">{{ result.urls_found|length if result.urls_found else result.results|length }} link(s) checked</p>
             {% for row in result.results %}
             <article class="link-card">
                 <div class="verdict risk-{{ row.risk_level or 'low' }}">{{ row.verdict|replace('_', ' ') }} · {{ row.host }}</div>
@@ -83,18 +98,20 @@
     <footer class="wrap foot">
         <a href="/privacy">Privacy</a>
         <span>·</span>
-        <span>Hiring scam &amp; brand-mismatch helper.</span>
+        <span>Link safety before you click: smishing, phishing, and brand mismatch.</span>
         <span>·</span>
         <a href="https://github.com/JsonCMorgan/link-check">Source</a>
     </footer>
     <script>
+        const panels = { url: 'panel-url', message: 'panel-message', qr: 'panel-qr' };
         document.querySelectorAll('.mode-tab').forEach(btn => {
             btn.addEventListener('click', () => {
                 const mode = btn.dataset.mode;
                 document.getElementById('mode').value = mode;
                 document.querySelectorAll('.mode-tab').forEach(b => b.classList.toggle('active', b === btn));
-                document.getElementById('panel-url').classList.toggle('hidden', mode !== 'url');
-                document.getElementById('panel-message').classList.toggle('hidden', mode !== 'message');
+                Object.entries(panels).forEach(([m, id]) => {
+                    document.getElementById(id).classList.toggle('hidden', mode !== m);
+                });
             });
         });
     </script>

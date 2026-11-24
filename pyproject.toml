@@ -11,8 +11,8 @@ requires-python = ">=3.11"
 license = { text = "MIT" }
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
-public = ["flask>=3.0.0", "gunicorn>=22.0.0"]
+dev = ["pytest>=8.0", "qrcode[pil]>=7.4"]
+public = ["flask>=3.0.0", "gunicorn>=22.0.0", "opencv-python-headless>=4.8.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

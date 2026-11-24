@@ -1,6 +1,6 @@
 # Link Check
 
-**Public tool:** paste a URL before you click (job scams, conference follow-ups, “wrong company name” links).
+**Public tool:** check links before you click — single URL, full SMS/email/chat, or **QR photo**. Good for smishing, phishing, delivery/bank impersonation, and “wrong company name” links (including hiring messages).
 
 - **No URL fetch** in v0.1  
 - **No cloud threat intel** by default  
@@ -23,7 +23,7 @@ Open **http://127.0.0.1:5055** (phone on same Wi‑Fi: `http://<your-pc-ip>:5055
 | Route | Purpose |
 |--------|---------|
 | `/` | Paste form |
-| `/api/check` | `POST` JSON `{ "url" }` or `{ "message" }`, optional `claimed_brand` |
+| `/api/check` | `POST` JSON `{ "url" }`, `{ "message" }`, or `{ "qr_paste" }`, optional `claimed_brand` (QR image upload via form only in v0.1) |
 | `/privacy` | Privacy copy |
 | `/health` | Uptime probe |
 
