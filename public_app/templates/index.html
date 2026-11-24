@@ -73,7 +73,7 @@
             <article class="link-card">
                 <div class="verdict risk-{{ row.risk_level or 'low' }}">{{ row.verdict|replace('_', ' ') }} · {{ row.host }}</div>
                 <p class="summary">{{ row.plain_summary }}</p>
-                <p class="defanged"><code>{{ row.defanged }}</code></p>
+                <p class="defanged">Defanged copy (for notes, not “safe to click”): <code>{{ row.defanged }}</code></p>
             </article>
             {% endfor %}
             {% else %}
@@ -82,7 +82,7 @@
             </div>
             <p class="summary">{{ result.plain_summary }}</p>
             <p class="meta">Host: <code>{{ result.host }}</code></p>
-            <p class="defanged">Defanged: <code>{{ result.defanged }}</code></p>
+            <p class="defanged">Defanged copy (for notes, not “safe to click”): <code>{{ result.defanged }}</code></p>
             {% if result.notes %}
             <ul class="notes">
                 {% for n in result.notes %}
